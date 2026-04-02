@@ -16,6 +16,25 @@ const isValidHex = (color) => {
     return hexRegex.test(color);
 };
 
+// 2. Validate that rich text contains actual readable content
+const hasReadableText = (html = '') => {
+    const textOnly = html
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .trim();
+    return textOnly.length > 0;
+};
+
+// 3. Validate URL shape before accessibility checks
+const isValidHttpUrl = (url = '') => {
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+        return false;
+    }
+};
+
 // 2. Validate Image URL Accessibility
 // We use a HEAD request to check the headers without downloading the whole image
 const isImageAccessible = async (url) => {
@@ -39,7 +58,9 @@ app.post('/api/content', async (req, res) => {
 
     // 1. Synchronous Validation: Check required fields
     if (!heading || !heading.trim()) errors.push("Heading is required.");
-    if (!paragraph || !paragraph.trim()) errors.push("Paragraph content is required.");
+    if (!paragraph || !paragraph.trim() || !hasReadableText(paragraph)) {
+        errors.push("Paragraph content is required.");
+    }
     if (!bgImage || !bgImage.trim()) errors.push("Background image URL is required.");
     if (!color || !color.trim()) errors.push("Text color is required.");
 
@@ -50,9 +71,13 @@ app.post('/api/content', async (req, res) => {
 
     // 3. Asynchronous Validation: Check Image Accessibility (only if URL was provided)
     if (bgImage) {
-        const isValidImg = await isImageAccessible(bgImage);
-        if (!isValidImg) {
-            errors.push("Background image URL is invalid, broken, or inaccessible.");
+        if (!isValidHttpUrl(bgImage)) {
+            errors.push("Background image URL format is invalid. Use a valid http(s) URL.");
+        } else {
+            const isValidImg = await isImageAccessible(bgImage);
+            if (!isValidImg) {
+                errors.push("Background image URL is broken or inaccessible.");
+            }
         }
     }
 
