@@ -2,6 +2,8 @@ import { useState } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css'; // Import Quill styles
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+
 export default function ContentForm({ onSuccess }) {
     const [formData, setFormData] = useState({
         heading: '',
@@ -47,7 +49,7 @@ export default function ContentForm({ onSuccess }) {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5000/api/content', {
+            const response = await fetch(`${API_BASE_URL}/api/content`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),

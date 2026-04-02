@@ -66,6 +66,26 @@ cd ../frontend
 npm install
 ```
 
+## Environment Variables
+
+Create env files from examples:
+
+- `backend/.env`
+- `frontend/.env`
+
+Backend env values:
+
+```env
+PORT=5000
+FRONTEND_URL=http://localhost:5173
+```
+
+Frontend env values:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000
+```
+
 ## Run The App
 
 Start backend (port `5000`):
